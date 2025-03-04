@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 
 type People = {
@@ -14,6 +14,14 @@ type Expenses = {
 };
 
 const CostCalc = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <InnerCostCalc />
+    </Suspense>
+  );
+};
+
+const InnerCostCalc = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -177,277 +185,283 @@ const CostCalc = () => {
   }, [showAddExpenseModal]);
 
   return (
-    <div className="flex w-screen h-screen items-center justify-center flex-col bg-gray-100 gap-3">
-      {showAddPersonModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 bg-opacity-50 transition-opacity duration-300">
-          <div className="bg-white w-[clamp(200px,400px,90vw)] p-5 pt-3 pb-4 rounded shadow-lg transform transition-transform duration-300">
-            <div className="flex gap-2 items-center justify-between mb-5">
-              <h2 className="text-xl">Add Person</h2>
-              <button
-                onClick={() => setShowAddPersonModal(false)}
-                className="text-red-500 hover:text-red-700 font-bold text-2xl transition duration-300"
-              >
-                &times;
-              </button>
-            </div>
-            <div className="flex gap-2 items-center mb-2">
-              <input
-                type="text"
-                placeholder="Name"
-                value={newPersonName}
-                onChange={(e) => setNewPersonName(e.target.value)}
-                className="border p-1.5 rounded w-[clamp(100px,80%,80vw)]"
-              />
-              <button
-                onClick={addPerson}
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1.5 px-4 rounded transition duration-300"
-              >
-                Add
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showAddExpenseModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 transition-opacity duration-300">
-          <div className="bg-white w-[clamp(200px,650px,90vw)] p-6 rounded shadow-lg transform transition-transform duration-300 flex flex-col max-h-[80vh] overflow-y-scroll">
-            <div className="flex gap-2 items-center justify-between mb-5">
-              <h2 className="text-xl">Add Expense</h2>
-              <button
-                onClick={() => setShowAddExpenseModal(false)}
-                className="text-red-500 hover:text-red-700 font-bold text-2xl transition duration-300"
-              >
-                &times;
-              </button>
-            </div>
-            <div className="flex gap-2 items-end">
-              <input
-                type="text"
-                placeholder="Expense Name"
-                value={newExpenseName}
-                onChange={(e) => setNewExpenseName(e.target.value)}
-                className="border p-1.5 mb-4 w-full rounded"
-              />
-              <div className="flex flex-col">
-                <div className="flex justify-end">
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="distribute"
-                      className="mr-2"
-                      checked={distribute}
-                      onChange={(e) => {
-                        setDistribute(e.target.checked);
-                        if (e.target.checked) {
-                          const amount = Number(
-                            (
-                              distributeAmount /
-                              people.filter((person) => person.checked).length
-                            ).toFixed(2)
-                          );
-                          setNewExpenseAmounts(
-                            people
-                              .filter((person) => person.checked)
-                              .reduce((acc, person) => {
-                                acc[person.name] = amount;
-                                return acc;
-                              }, {} as Record<string, number>)
-                          );
-                        } else {
-                          setNewExpenseAmounts({});
-                        }
-                      }}
-                    />
-                    <label
-                      htmlFor="distribute"
-                      className="text-sm font-medium text-gray-700"
-                    >
-                      Distribute equally
-                    </label>
-                  </div>
-                </div>
+    <Suspense fallback={<div>Loading...</div>}>
+      <div className="flex w-screen h-screen items-center justify-center flex-col bg-gray-100 gap-3">
+        {showAddPersonModal && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black/50 bg-opacity-50 transition-opacity duration-300">
+            <div className="bg-white w-[clamp(200px,400px,90vw)] p-5 pt-3 pb-4 rounded shadow-lg transform transition-transform duration-300">
+              <div className="flex gap-2 items-center justify-between mb-5">
+                <h2 className="text-xl">Add Person</h2>
+                <button
+                  onClick={() => setShowAddPersonModal(false)}
+                  className="text-red-500 hover:text-red-700 font-bold text-2xl transition duration-300"
+                >
+                  &times;
+                </button>
+              </div>
+              <div className="flex gap-2 items-center mb-2">
                 <input
-                  type="number"
-                  placeholder="Distribution"
-                  value={distributeAmount || ""}
-                  onChange={(e) => setDistributeAmount(Number(e.target.value))}
-                  className="border p-1.5 mb-4 w-full rounded"
+                  type="text"
+                  placeholder="Name"
+                  value={newPersonName}
+                  onChange={(e) => setNewPersonName(e.target.value)}
+                  className="border p-1.5 rounded w-[clamp(100px,80%,80vw)]"
                 />
+                <button
+                  onClick={addPerson}
+                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1.5 px-4 rounded transition duration-300"
+                >
+                  Add
+                </button>
               </div>
             </div>
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-2">
-              {people.map((person) => (
-                <div key={person.name} className="mb-2">
-                  <div className="flex w-full items-center justify-between">
-                    <label className="block text-sm font-medium text-gray-700">
-                      {person.name}
-                    </label>
-                    <input
-                      type="checkbox"
-                      checked={person.checked}
-                      onChange={(e) => {
-                        setPeople((prev) =>
-                          prev.map((p) =>
-                            p.name === person.name
-                              ? { ...p, checked: e.target.checked }
-                              : p
-                          )
-                        );
-                        if (e.target.checked) {
-                          const amount = Number(
-                            (
-                              distributeAmount /
-                              people.filter(
-                                (p) => p.checked || p.name === person.name
-                              ).length
-                            ).toFixed(2)
-                          );
-                          setNewExpenseAmounts(
-                            people
-                              .filter(
-                                (p) => p.checked || p.name === person.name
-                              )
-                              .reduce((acc, p) => {
-                                acc[p.name] = amount;
-                                return acc;
-                              }, {} as Record<string, number>)
-                          );
-                        } else {
-                          setNewExpenseAmounts({});
-                        }
-                      }}
-                      className="mr-2"
-                    />
+          </div>
+        )}
+
+        {showAddExpenseModal && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black/50 transition-opacity duration-300">
+            <div className="bg-white w-[clamp(200px,650px,90vw)] p-6 rounded shadow-lg transform transition-transform duration-300 flex flex-col max-h-[80vh] overflow-y-scroll">
+              <div className="flex gap-2 items-center justify-between mb-5">
+                <h2 className="text-xl">Add Expense</h2>
+                <button
+                  onClick={() => setShowAddExpenseModal(false)}
+                  className="text-red-500 hover:text-red-700 font-bold text-2xl transition duration-300"
+                >
+                  &times;
+                </button>
+              </div>
+              <div className="flex gap-2 items-end">
+                <input
+                  type="text"
+                  placeholder="Expense Name"
+                  value={newExpenseName}
+                  onChange={(e) => setNewExpenseName(e.target.value)}
+                  className="border p-1.5 mb-4 w-full rounded"
+                />
+                <div className="flex flex-col">
+                  <div className="flex justify-end">
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="distribute"
+                        className="mr-2"
+                        checked={distribute}
+                        onChange={(e) => {
+                          setDistribute(e.target.checked);
+                          if (e.target.checked) {
+                            const amount = Number(
+                              (
+                                distributeAmount /
+                                people.filter((person) => person.checked).length
+                              ).toFixed(2)
+                            );
+                            setNewExpenseAmounts(
+                              people
+                                .filter((person) => person.checked)
+                                .reduce((acc, person) => {
+                                  acc[person.name] = amount;
+                                  return acc;
+                                }, {} as Record<string, number>)
+                            );
+                          } else {
+                            setNewExpenseAmounts({});
+                          }
+                        }}
+                      />
+                      <label
+                        htmlFor="distribute"
+                        className="text-sm font-medium text-gray-700"
+                      >
+                        Distribute equally
+                      </label>
+                    </div>
                   </div>
                   <input
                     type="number"
-                    placeholder="Amount"
-                    value={newExpenseAmounts[person.name] || ""}
+                    placeholder="Distribution"
+                    value={distributeAmount || ""}
                     onChange={(e) =>
-                      setNewExpenseAmounts({
-                        ...newExpenseAmounts,
-                        [person.name]: Number(e.target.value),
-                      })
+                      setDistributeAmount(Number(e.target.value))
                     }
-                    className="border p-1.5 w-full rounded"
+                    className="border p-1.5 mb-4 w-full rounded"
                   />
                 </div>
-              ))}
+              </div>
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-2">
+                {people.map((person) => (
+                  <div key={person.name} className="mb-2">
+                    <div className="flex w-full items-center justify-between">
+                      <label className="block text-sm font-medium text-gray-700">
+                        {person.name}
+                      </label>
+                      <input
+                        type="checkbox"
+                        checked={person.checked}
+                        onChange={(e) => {
+                          setPeople((prev) =>
+                            prev.map((p) =>
+                              p.name === person.name
+                                ? { ...p, checked: e.target.checked }
+                                : p
+                            )
+                          );
+                          if (e.target.checked) {
+                            const amount = Number(
+                              (
+                                distributeAmount /
+                                people.filter(
+                                  (p) => p.checked || p.name === person.name
+                                ).length
+                              ).toFixed(2)
+                            );
+                            setNewExpenseAmounts(
+                              people
+                                .filter(
+                                  (p) => p.checked || p.name === person.name
+                                )
+                                .reduce((acc, p) => {
+                                  acc[p.name] = amount;
+                                  return acc;
+                                }, {} as Record<string, number>)
+                            );
+                          } else {
+                            setNewExpenseAmounts({});
+                          }
+                        }}
+                        className="mr-2"
+                      />
+                    </div>
+                    <input
+                      type="number"
+                      placeholder="Amount"
+                      value={newExpenseAmounts[person.name] || ""}
+                      onChange={(e) =>
+                        setNewExpenseAmounts({
+                          ...newExpenseAmounts,
+                          [person.name]: Number(e.target.value),
+                        })
+                      }
+                      className="border p-1.5 w-full rounded"
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={addExpense}
+                  className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-300"
+                >
+                  Add
+                </button>
+              </div>
             </div>
-            <div className="flex justify-end gap-2">
+          </div>
+        )}
+
+        <div className="wrapper w-[clamp(100px,1600px,95vw)] overflow-hidden">
+          <div className="flex justify-center md:justify-between items-center mb-6 flex-wrap gap-3">
+            <div className="heading text-4xl font-semibold">
+              Cost Calculator
+            </div>
+            <div className="flex items-center gap-3 text-sm">
               <button
-                onClick={addExpense}
-                className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-300"
+                onClick={clearData}
+                className="bg-red-400 hover:bg-red-500 text-white font-medium py-2 px-4 rounded-sm transition duration-300"
               >
-                Add
+                Clear Data
+              </button>
+              <button
+                onClick={() => setShowAddPersonModal(true)}
+                className="bg-blue-400 hover:bg-blue-500 text-white font-medium py-2 px-4 rounded-sm transition duration-300"
+              >
+                Add Person
+              </button>
+              <button
+                onClick={() => setShowAddExpenseModal(true)}
+                className="bg-green-400 hover:bg-green-500 text-white font-medium py-2 px-4 rounded-sm transition duration-300"
+              >
+                Add Expense
               </button>
             </div>
           </div>
-        </div>
-      )}
 
-      <div className="wrapper w-[clamp(100px,1600px,95vw)] overflow-hidden">
-        <div className="flex justify-center md:justify-between items-center mb-6 flex-wrap gap-3">
-          <div className="heading text-4xl font-semibold">Cost Calculator</div>
-          <div className="flex items-center gap-3 text-sm">
-            <button
-              onClick={clearData}
-              className="bg-red-400 hover:bg-red-500 text-white font-medium py-2 px-4 rounded-sm transition duration-300"
-            >
-              Clear Data
-            </button>
-            <button
-              onClick={() => setShowAddPersonModal(true)}
-              className="bg-blue-400 hover:bg-blue-500 text-white font-medium py-2 px-4 rounded-sm transition duration-300"
-            >
-              Add Person
-            </button>
-            <button
-              onClick={() => setShowAddExpenseModal(true)}
-              className="bg-green-400 hover:bg-green-500 text-white font-medium py-2 px-4 rounded-sm transition duration-300"
-            >
-              Add Expense
-            </button>
-          </div>
-        </div>
-
-        <div className="w-full table-wrapper overflow-x-scroll">
-          <table className="w-full divide-y divide-gray-200 bg-white shadow-md rounded-lg">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Expense
-                </th>
-                {people.map((person) => (
-                  <th
-                    key={person.name}
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    {person.name}
+          <div className="w-full table-wrapper overflow-x-scroll">
+            <table className="w-full divide-y divide-gray-200 bg-white shadow-md rounded-lg">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Expense
                   </th>
+                  {people.map((person) => (
+                    <th
+                      key={person.name}
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      {person.name}
+                    </th>
+                  ))}
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {expenses.map((expense, index) => (
+                  <tr key={index}>
+                    <td className="px-3 py-1 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {expense.name}
+                    </td>
+                    {people.map((person) => (
+                      <td
+                        key={person.name}
+                        className="px-3 py-1 whitespace-nowrap text-sm text-gray-500"
+                      >
+                        {expense[person.name] !== undefined
+                          ? expense[person.name]
+                          : 0}
+                      </td>
+                    ))}
+                    <td className="px-3 py-1 whitespace-nowrap text-sm font-medium">
+                      <button
+                        onClick={() => editExpense(index)}
+                        className="bg-yellow-500 w-[80px] hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded transition duration-300"
+                      >
+                        Edit
+                      </button>
+                    </td>
+                  </tr>
                 ))}
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {expenses.map((expense, index) => (
-                <tr key={index}>
-                  <td className="px-3 py-1 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {expense.name}
+                <tr className="bg-green-100">
+                  <td className="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
+                    Total
                   </td>
                   {people.map((person) => (
                     <td
                       key={person.name}
-                      className="px-3 py-1 whitespace-nowrap text-sm text-gray-500"
+                      className="px-3 py-2 whitespace-nowrap text-sm text-gray-500"
                     >
-                      {expense[person.name] !== undefined
-                        ? expense[person.name]
-                        : 0}
+                      {expenses.reduce(
+                        (acc, expense) =>
+                          acc +
+                          (typeof expense[person.name] === "number"
+                            ? (expense[person.name] as number)
+                            : 0),
+                        0
+                      )}
                     </td>
                   ))}
                   <td className="px-3 py-1 whitespace-nowrap text-sm font-medium">
-                    <button
-                      onClick={() => editExpense(index)}
-                      className="bg-yellow-500 w-[80px] hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded transition duration-300"
-                    >
-                      Edit
+                    <button className="bg-lime-500 w-[80px] hover:bg-lime-600 text-white font-bold py-2 px-4 rounded transition duration-300">
+                      Share
                     </button>
                   </td>
                 </tr>
-              ))}
-              <tr className="bg-green-100">
-                <td className="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
-                  Total
-                </td>
-                {people.map((person) => (
-                  <td
-                    key={person.name}
-                    className="px-3 py-2 whitespace-nowrap text-sm text-gray-500"
-                  >
-                    {expenses.reduce(
-                      (acc, expense) =>
-                        acc +
-                        (typeof expense[person.name] === "number"
-                          ? (expense[person.name] as number)
-                          : 0),
-                      0
-                    )}
-                  </td>
-                ))}
-                <td className="px-3 py-1 whitespace-nowrap text-sm font-medium">
-                  <button className="bg-lime-500 w-[80px] hover:bg-lime-600 text-white font-bold py-2 px-4 rounded transition duration-300">
-                    Share
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-    </div>
+    </Suspense>
   );
 };
 

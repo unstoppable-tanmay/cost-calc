@@ -184,6 +184,16 @@ const InnerCostCalc = () => {
     }
   }, [showAddExpenseModal]);
 
+  const [copied, setCopied] = React.useState(false);
+  const copyURL = () => {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      setCopied(true);
+      setTimeout(() => {
+        setCopied(false);
+      }, 2000);
+    });
+  };
+
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <div className="flex w-screen h-screen items-center justify-center flex-col bg-gray-100 gap-3">
@@ -194,7 +204,7 @@ const InnerCostCalc = () => {
                 <h2 className="text-xl">Add Person</h2>
                 <button
                   onClick={() => setShowAddPersonModal(false)}
-                  className="text-red-500 hover:text-red-700 font-bold text-2xl transition duration-300"
+                  className="text-red-500 cursor-pointer hover:text-red-700 font-bold text-2xl transition duration-300"
                 >
                   &times;
                 </button>
@@ -209,7 +219,7 @@ const InnerCostCalc = () => {
                 />
                 <button
                   onClick={addPerson}
-                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1.5 px-4 rounded transition duration-300"
+                  className="bg-blue-500 cursor-pointer hover:bg-blue-700 text-white font-bold py-1.5 px-4 rounded transition duration-300"
                 >
                   Add
                 </button>
@@ -225,7 +235,7 @@ const InnerCostCalc = () => {
                 <h2 className="text-xl">Add Expense</h2>
                 <button
                   onClick={() => setShowAddExpenseModal(false)}
-                  className="text-red-500 hover:text-red-700 font-bold text-2xl transition duration-300"
+                  className="text-red-500 cursor-pointer hover:text-red-700 font-bold text-2xl transition duration-300"
                 >
                   &times;
                 </button>
@@ -349,7 +359,7 @@ const InnerCostCalc = () => {
               <div className="flex justify-end gap-2">
                 <button
                   onClick={addExpense}
-                  className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-300"
+                  className="bg-green-500 cursor-pointer hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-300"
                 >
                   Add
                 </button>
@@ -366,19 +376,19 @@ const InnerCostCalc = () => {
             <div className="flex items-center gap-3 text-sm">
               <button
                 onClick={clearData}
-                className="bg-red-400 hover:bg-red-500 text-white font-medium py-2 px-4 rounded-sm transition duration-300"
+                className="bg-red-400 cursor-pointer hover:bg-red-500 text-white font-medium py-2 px-4 rounded-sm transition duration-300"
               >
                 Clear Data
               </button>
               <button
                 onClick={() => setShowAddPersonModal(true)}
-                className="bg-blue-400 hover:bg-blue-500 text-white font-medium py-2 px-4 rounded-sm transition duration-300"
+                className="bg-blue-400 cursor-pointer hover:bg-blue-500 text-white font-medium py-2 px-4 rounded-sm transition duration-300"
               >
                 Add Person
               </button>
               <button
                 onClick={() => setShowAddExpenseModal(true)}
-                className="bg-green-400 hover:bg-green-500 text-white font-medium py-2 px-4 rounded-sm transition duration-300"
+                className="bg-green-400 cursor-pointer hover:bg-green-500 text-white font-medium py-2 px-4 rounded-sm transition duration-300"
               >
                 Add Expense
               </button>
@@ -424,7 +434,7 @@ const InnerCostCalc = () => {
                     <td className="px-3 py-1 whitespace-nowrap text-sm font-medium">
                       <button
                         onClick={() => editExpense(index)}
-                        className="bg-yellow-500 w-[80px] hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded transition duration-300"
+                        className="bg-yellow-500 cursor-pointer w-[80px] hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded transition duration-300"
                       >
                         Edit
                       </button>
@@ -451,8 +461,12 @@ const InnerCostCalc = () => {
                     </td>
                   ))}
                   <td className="px-3 py-1 whitespace-nowrap text-sm font-medium">
-                    <button className="bg-lime-500 w-[80px] hover:bg-lime-600 text-white font-bold py-2 px-4 rounded transition duration-300">
-                      Share
+                    <button
+                      className="bg-lime-500 cursor-copy disabled:cursor-wait w-[80px] hover:bg-lime-600 text-white font-bold py-2 px-4 rounded transition duration-300 disabled:bg-gray-400"
+                      onClick={copyURL}
+                      disabled={copied}
+                    >
+                      {copied ? "Copied" : "Share"}
                     </button>
                   </td>
                 </tr>
